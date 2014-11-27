@@ -16,19 +16,13 @@ db.once('open', function() {
 
 mongoose.connect('mongodb://localhost/news');
 
-
-
 var trendSchema = mongoose.Schema({
     tName: String,
     tName_h: String,    
     region: String
   });
 
-
 var Trend = mongoose.model('Trend', trendSchema);
-
-
-
 
 function getTrends(req, res, next) {
 
@@ -42,18 +36,14 @@ function getTrends(req, res, next) {
 
         req.trends = plucked;
         console.log(' req, trends  ==', req.trends);
+
+        req.newurl = {url: '/page-6/', changefreq: 'monthly', priority: 0.7}
+
+
         next();// No need to return anything.
     }); 
-
 }
 
-
-//  Trend.find(function(err, trends) {
-//   if (err) return console.error(err);
-//       // console.dir(trends);
-//     var plucked = _.pluck(trends, 'tName');
-//     console.log('plucked values =='.red, plucked);
-// }); 
 
 //~~~~~~~~~~~~~/~~~~~~~~~~~~~~~~~~~~~~/ DB retrieval  ends ~~~~~~~~~~~~~~~~~/~~~~~~~~~~~~~~~~~~~~~~/
 
@@ -75,6 +65,7 @@ var sitemap = sm.createSitemap ({
 
 router.get('/sitemap.xml', getTrends, function(req, res) {
     console.log(' req .trends  = '.blue, req.trends); 
+    console.log(' req. newurl  = '.blue, req.newurl); 
 
     var db = req.db;
     var collection = db.get('usercollection');
@@ -90,6 +81,8 @@ router.get('/sitemap.xml', getTrends, function(req, res) {
 
   sitemap.add({url: '/page-4/', changefreq: 'monthly', priority: 0.7});
   sitemap.add({url: '/page-5/'});
+  sitemap.add(req.newurl); 
+  console.log('sitemap.urls ======'.white, sitemap.urls);
 
 });
 
