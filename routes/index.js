@@ -1,3 +1,4 @@
+var colors = require('colors'); 
 var express = require('express');
 var router = express.Router();
 
@@ -17,18 +18,33 @@ var sitemap = sm.createSitemap ({
 
 
 
-
+function hola (h) {
+    console.log('  hola ji '.white);
+}
 
 
 router.get('/sitemap.xml', function(req, res) {
+
+    var db = req.db;
+    var collection = db.get('usercollection');
+    collection.find({},{},function(e,docs){
+    console.log('docs  = '.red,docs);
+
+    });
+
+
+
   sitemap.toXML( function (xml) {
       res.header('Content-Type', 'application/xml');
       res.send( xml );
   });
+
+  sitemap.add({url: '/page-4/', changefreq: 'monthly', priority: 0.7});
+  sitemap.add({url: '/page-5/'});
+
 });
 
-sitemap.add({url: '/page-4/', changefreq: 'monthly', priority: 0.7});
-sitemap.add({url: '/page-5/'});
+
 
 
 
@@ -38,7 +54,7 @@ router.get('/userlist', function(req, res) {
     var db = req.db;
     var collection = db.get('usercollection');
     collection.find({},{},function(e,docs){
-        console.log('docs  = ',docs);
+        console.log('docs  = '.green,docs);
         res.render('userlist', {
             "userlist" : docs
         });
