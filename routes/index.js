@@ -1,8 +1,61 @@
 var colors = require('colors'); 
 var express = require('express');
 var router = express.Router();
-
+var mongoose = require('mongoose');
+var _ = require('underscore');
 var sm = require('sitemap');
+
+//~~~~~~~~~~~~~/~~~~~~~~~~~~~~~~~~~~~~/ DB retrieval ~~~~~~~~~~~~~~~~~/~~~~~~~~~~~~~~~~~~~~~~/
+
+var db = mongoose.connection;
+
+db.on('error', console.error);
+db.once('open', function() {
+  console.log(' db opened');
+});
+
+mongoose.connect('mongodb://localhost/news');
+
+
+
+var trendSchema = mongoose.Schema({
+    tName: String,
+    tName_h: String,    
+    region: String
+  });
+
+
+var Trend = mongoose.model('Trend', trendSchema);
+
+
+
+
+function getTrends(req, res, next) {
+
+     Trend.find(function(err, trends) {
+      if (err) return console.error(err);
+          // console.dir(trends);
+        var plucked = _.pluck(trends, 'tName');
+        // console.log('plucked values =='.red, plucked);
+        
+        var plucked = _.pluck(trends, 'tName');
+
+        req.trends = plucked;
+        console.log(' req, trends  ==', req.trends);
+        next();// No need to return anything.
+    }); 
+
+}
+
+
+//  Trend.find(function(err, trends) {
+//   if (err) return console.error(err);
+//       // console.dir(trends);
+//     var plucked = _.pluck(trends, 'tName');
+//     console.log('plucked values =='.red, plucked);
+// }); 
+
+//~~~~~~~~~~~~~/~~~~~~~~~~~~~~~~~~~~~~/ DB retrieval  ends ~~~~~~~~~~~~~~~~~/~~~~~~~~~~~~~~~~~~~~~~/
 
 
 
@@ -17,24 +70,20 @@ var sitemap = sm.createSitemap ({
     });
 
 
-
-function hola (h) {
-    console.log('  hola ji '.white);
-}
+//~~~~~~~~~~~~~~~~~~/~~~~~~~~~~~~~~~~~~~~~~/ ROUTES ~~~~~~~~~~~~~~~~~~~~~~/~~~~~~~~~~~~~~~~~~~~~~/
 
 
-router.get('/sitemap.xml', function(req, res) {
+router.get('/sitemap.xml', getTrends, function(req, res) {
+    console.log(' req .trends  = '.blue, req.trends); 
 
     var db = req.db;
     var collection = db.get('usercollection');
     collection.find({},{},function(e,docs){
-    console.log('docs  = '.red,docs);
+    // console.log('docs  = '.red,docs);
 
     });
 
-
-
-  sitemap.toXML( function (xml) {
+    sitemap.toXML( function (xml) {
       res.header('Content-Type', 'application/xml');
       res.send( xml );
   });
@@ -60,12 +109,6 @@ router.get('/userlist', function(req, res) {
         });
     });
 });
-
-
-
-
-
-
 
 
 
