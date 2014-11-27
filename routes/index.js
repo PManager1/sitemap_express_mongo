@@ -24,18 +24,41 @@ var trendSchema = mongoose.Schema({
 
 var Trend = mongoose.model('Trend', trendSchema);
 
+
+
+
+
 function getTrends(req, res, next) {
 
      Trend.find(function(err, trends) {
       if (err) return console.error(err);
-          // console.dir(trends);
-        var plucked = _.pluck(trends, 'tName');
-        // console.log('plucked values =='.red, plucked);
         
-        var plucked = _.pluck(trends, 'tName');
+        var pluckedT = _.pluck(trends, 'tName_h');
 
-        req.trends = plucked;
-        console.log(' req, trends  ==', req.trends);
+
+        var changefreq_value = 'daily';
+        var priority_value = '0.3';  
+
+        var urlArr = [];
+
+        for (var i = 0; i < pluckedT.length; i++) {
+            var element = {}; 
+            // console.log('line 41 ~~~ pluckedT[i]  ='.red,pluckedT[i]);
+            element.url = pluckedT[i];
+            element.changefreq = 'daily';
+            element.priority = 0.3 ;
+            // console.log('line 45 ~~~  element'.white, element);
+            // console.log('line 46 ~~~  before url Arr  '.blue, urlArr);
+            urlArr.push(element);
+            // console.log('line 48 ~~~  after url Arr  '.blue, urlArr);
+        };
+
+        
+        console.log( ' urlArr =~~~~~~~~~~~~~~~~ line 51 ~~~ white '.white, urlArr);
+
+
+        req.trends = urlArr;
+        // console.log(' req, trends  ==', req.trends);
 
         req.newurl = {url: '/page-6/', changefreq: 'monthly', priority: 0.7}
 
@@ -50,7 +73,7 @@ function getTrends(req, res, next) {
 
 
 var sitemap = sm.createSitemap ({
-      hostname: 'http://example.com',
+      hostname: 'http://rushnwash.com/#/trend/',
       cacheTime: 600000,        // 600 sec - cache purge period
       urls: [
         { url: '/page-1/',  changefreq: 'daily', priority: 0.3 },
@@ -78,6 +101,16 @@ router.get('/sitemap.xml', getTrends, function(req, res) {
       res.header('Content-Type', 'application/xml');
       res.send( xml );
   });
+
+
+
+  var users = req.trends;
+
+
+    _.each(users, function(user){
+        sitemap.add(user); 
+        console.log('user line 110 ='.white,user);
+    });
 
   sitemap.add({url: '/page-4/', changefreq: 'monthly', priority: 0.7});
   sitemap.add({url: '/page-5/'});
