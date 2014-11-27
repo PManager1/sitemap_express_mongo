@@ -1,15 +1,37 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET home page. */
-router.get('/', function(req, res) {
-    res.render('index', { title: 'Express' });
+var sm = require('sitemap');
+
+
+
+var sitemap = sm.createSitemap ({
+      hostname: 'http://example.com',
+      cacheTime: 600000,        // 600 sec - cache purge period
+      urls: [
+        { url: '/page-1/',  changefreq: 'daily', priority: 0.3 },
+        { url: '/page-2/',  changefreq: 'monthly',  priority: 0.7 },
+        { url: '/page-3/' }     // changefreq: 'weekly',  priority: 0.5
+      ]
+    });
+
+
+
+
+
+
+router.get('/sitemap.xml', function(req, res) {
+  sitemap.toXML( function (xml) {
+      res.header('Content-Type', 'application/xml');
+      res.send( xml );
+  });
 });
 
-/* GET Hello World page. */
-router.get('/helloworld', function(req, res) {
-	res.render('helloworld', { title: 'Hello, World!' })
-});
+sitemap.add({url: '/page-4/', changefreq: 'monthly', priority: 0.7});
+sitemap.add({url: '/page-5/'});
+
+
+
 
 /* GET Userlist page. */
 router.get('/userlist', function(req, res) {
@@ -22,6 +44,29 @@ router.get('/userlist', function(req, res) {
         });
     });
 });
+
+
+
+
+
+
+
+
+
+
+
+
+/* GET home page. */
+router.get('/', function(req, res) {
+    res.render('index', { title: 'Express' });
+});
+
+/* GET Hello World page. */
+router.get('/helloworld', function(req, res) {
+	res.render('helloworld', { title: 'Hello, World!' })
+});
+
+
 
 /* GET New User page. */
 router.get('/newuser', function(req, res) {
